@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.5.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+jar {
+    baseName = 'resource-api'
+    version =  '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    // tag::jetty[]
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+    compile("org.springframework.boot:spring-boot-starter-jetty")
+    compile("org.springframework.boot:spring-boot-starter-data-mongodb")
+
+    // end::jetty[]
+	compile("org.springframework.boot:spring-boot-starter-security")
+	compile("org.springframework.security.oauth:spring-security-oauth2:2.0.7.RELEASE")
+	compile("org.springframework.security:spring-security-jwt")
+
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
+
