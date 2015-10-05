@@ -59,7 +59,9 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     }
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter =  new JwtAccessTokenConverter();
+        JwtAccessTokenConverter jwtAccessTokenConverter =  new CustomTokenEnhancer();
+        // use below to use vanilla jwt token
+        //JwtAccessTokenConverter jwtAccessTokenConverter =  new JwtAccessTokenConverter();
         KeyPair keyPair = new KeyStoreKeyFactory(
                 new ClassPathResource(jwtKeyStoreFile), jwtKeyStorePass.toCharArray())
                 .getKeyPair(jwtKeyStoreKey, jwtKeyStoreKeyPass.toCharArray());
