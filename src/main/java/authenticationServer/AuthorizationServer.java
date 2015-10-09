@@ -87,11 +87,9 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
                 .authorities("ROLE_CLIENT")
                 .scopes("read", "write")
                 .resourceIds(RESOURCE_ID)
-                .secret(clientSecret);
+                .secret(clientSecret)
+                .accessTokenValiditySeconds(3600)
+                .refreshTokenValiditySeconds(3600*24*30);
     }
-    @Override
-    public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception
-    {
-        oauthServer.checkTokenAccess("isAuthenticated()").tokenKeyAccess("isAuthenticated()");
-    }
+
 }
