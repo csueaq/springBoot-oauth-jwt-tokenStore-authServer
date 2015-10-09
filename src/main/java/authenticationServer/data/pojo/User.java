@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Created by Izzy on 17/08/15.
@@ -30,6 +31,7 @@ public class User implements UserDetails, Serializable{
     private Integer age;
     private Address address;
 
+    private Date passwordUpdatedAt;
     public String getId() {
         return id;
     }
@@ -139,5 +141,13 @@ public class User implements UserDetails, Serializable{
 
     public void setAddress(Address address) {
         this.address = address;
+    }
+
+    public Date getPasswordUpdatedAt() {
+        return passwordUpdatedAt;
+    }
+
+    public void setPasswordUpdatedAt(Date passwordUpdatedAt) {
+        this.passwordUpdatedAt = passwordUpdatedAt;
     }
 }
