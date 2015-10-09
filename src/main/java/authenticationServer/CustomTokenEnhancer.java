@@ -4,8 +4,11 @@ import authenticationServer.data.pojo.User;
 import authenticationServer.data.repo.UserRepository;
 import authenticationServer.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.jwt.Jwt;
+import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
@@ -32,11 +35,16 @@ public class CustomTokenEnhancer extends JwtAccessTokenConverter {
 
         additionalInfo.put("user", userDetailsService.getBasicUserInfoForToken(user));
         additionalInfo.put("issue_time", System.currentTimeMillis());
-        additionalInfo.put("user_secret", user.getPasswordUpdatedAt().getTime());
+        additionalInfo.put("user_secret", user.getPasswordUpdatedAt().getTime()+"");
 
         ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
 
         return super.enhance(accessToken, authentication);
+    }
+
+
+    public Map<String, Object> decoder(String token) {
+       return super.decode(token);
     }
 
 }

@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.*;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
@@ -60,8 +61,7 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter jwtAccessTokenConverter =  new CustomTokenEnhancer();
-        // use below to use vanilla jwt token
-        //JwtAccessTokenConverter jwtAccessTokenConverter =  new JwtAccessTokenConverter();
+        jwtAccessTokenConverter.setAccessTokenConverter(getDefaultAccessTokenConverter());
         KeyPair keyPair = new KeyStoreKeyFactory(
                 new ClassPathResource(jwtKeyStoreFile), jwtKeyStorePass.toCharArray())
                 .getKeyPair(jwtKeyStoreKey, jwtKeyStoreKeyPass.toCharArray());
@@ -73,10 +73,39 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     @Override // [2]
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
+                .tokenServices(tokenServices())
                 .tokenStore(tokenStore())
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService)
                 .accessTokenConverter(accessTokenConverter());
+    }
+
+    @Bean
+    public AuthorizationServerTokenServices tokenServices() {
+        CustomDefaultTokenServices defaultTokenServices = new CustomDefaultTokenServices();
+        defaultTokenServices.setTokenStore(tokenStore());
+        defaultTokenServices.setReuseRefreshToken(true);
+        defaultTokenServices.setSupportRefreshToken(true);
+        defaultTokenServices.setSupportRefreshToken(true);
+
+
+        //same thing
+        defaultTokenServices.setTokenEnhancer(accessTokenConverter());
+        defaultTokenServices.setTokenConverter(accessTokenConverter()); // until there is a getTokenEnhancer
+        return defaultTokenServices;
+    }
+
+
+    @Bean
+    AccessTokenConverter getDefaultAccessTokenConverter(){
+        DefaultAccessTokenConverter defaultAccessTokenConverter = new DefaultAccessTokenConverter();
+        defaultAccessTokenConverter.setUserTokenConverter(getCustomUserAuthenticationConvertor());
+        return defaultAccessTokenConverter;
+    }
+
+    @Bean
+    UserAuthenticationConverter getCustomUserAuthenticationConvertor(){
+        return new CustomUserAuthenticationConvertor();
     }
 
     @Override // [3]
@@ -91,5 +120,7 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
                 .accessTokenValiditySeconds(3600)
                 .refreshTokenValiditySeconds(3600*24*30);
     }
+
+
 
 }
