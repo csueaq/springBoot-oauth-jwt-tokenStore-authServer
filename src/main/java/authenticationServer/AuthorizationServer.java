@@ -114,7 +114,7 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
                 .withClient(clientId)
                 .authorizedGrantTypes("client_credentials", "password","refresh_token")
                 .authorities("ROLE_CLIENT")
-                .scopes("read", "write")
+                .scopes("SIGNED_IN", "REMEMBERED")
                 .resourceIds(RESOURCE_ID)
                 .secret(clientSecret)
                 .accessTokenValiditySeconds(3600)

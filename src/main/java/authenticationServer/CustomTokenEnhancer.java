@@ -4,17 +4,16 @@ import authenticationServer.data.pojo.User;
 import authenticationServer.data.repo.UserRepository;
 import authenticationServer.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.jwt.Jwt;
-import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
-import java.security.MessageDigest;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Izzy on 20/09/15.
@@ -38,6 +37,24 @@ public class CustomTokenEnhancer extends JwtAccessTokenConverter {
         additionalInfo.put("user_secret", user.getPasswordUpdatedAt().getTime()+"");
 
         ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
+
+        if(authentication.getOAuth2Request().getRefreshTokenRequest() != null) {
+          Map<String, Object> originalRefreshMap = decoder(accessToken.getRefreshToken().getValue());
+
+            long issueTime  = (long) originalRefreshMap.get("issue_time");
+            long currentTime = System.currentTimeMillis();
+
+            long diffTime = currentTime  - issueTime;
+            long oneHour = (60*60*1000);
+
+            if(diffTime > oneHour ){
+                Set scope = new HashSet<>();
+                scope.add("REMEMBERED");
+                ((DefaultOAuth2AccessToken) accessToken).setScope(scope);
+                return super.enhance(accessToken, authentication);
+            }
+
+        }
 
         return super.enhance(accessToken, authentication);
     }
